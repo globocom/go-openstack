@@ -45,15 +45,12 @@ func NewClient(username, password, tenantName, authUrl string) (*Client, error) 
 		return nil, errors.New(data["error"]["title"].(string))
 	}
 	token := data["access"]["token"].(map[string]interface{})["id"].(string)
-	return &Client{Token: token, authUrl: authUrl}, err
+	return &Client{Token: token, authUrl: authUrl}, nil
 }
 
 func (c *Client) NewTenant(name, description string, enabled bool) (*Tenant, error) {
 	b := bytes.NewBufferString(fmt.Sprintf(`{"tenant": {"name": "%s", "description": "%s", "enabled": %t}}`, name, description, enabled))
-	request, err := http.NewRequest("POST", c.authUrl+"/tenants", b)
-	if err != nil {
-		return nil, err
-	}
+	request, _ := http.NewRequest("POST", c.authUrl+"/tenants", b)
 	request.Header.Set("X-Auth-Token", c.Token)
 	request.Header.Set("Content-Type", "application/json")
 	httpClient := &http.Client{}
@@ -61,10 +58,7 @@ func (c *Client) NewTenant(name, description string, enabled bool) (*Tenant, err
 	defer response.Body.Close()
 	result, _ := ioutil.ReadAll(response.Body)
 	var data map[string]map[string]interface{}
-	err = json.Unmarshal(result, &data)
-	if err != nil {
-		return nil, err
-	}
+	_ = json.Unmarshal(result, &data)
 	tenant := Tenant{
 		Id:          data["tenant"]["id"].(string),
 		Name:        data["tenant"]["name"].(string),
@@ -75,10 +69,7 @@ func (c *Client) NewTenant(name, description string, enabled bool) (*Tenant, err
 
 func (c *Client) NewUser(name, password, email, tenantId string, enabled bool) (*User, error) {
 	b := bytes.NewBufferString(fmt.Sprintf(`{"user": {"name": "%s", "password": "%s", "tenantId": "%s", "email": "%s", "enabled": %t}}`, name, password, tenantId, email, enabled))
-	request, err := http.NewRequest("POST", c.authUrl+"/users", b)
-	if err != nil {
-		return nil, err
-	}
+	request, _ := http.NewRequest("POST", c.authUrl+"/users", b)
 	request.Header.Set("X-Auth-Token", c.Token)
 	request.Header.Set("Content-Type", "application/json")
 	httpClient := &http.Client{}
@@ -86,10 +77,7 @@ func (c *Client) NewUser(name, password, email, tenantId string, enabled bool) (
 	defer response.Body.Close()
 	result, _ := ioutil.ReadAll(response.Body)
 	var data map[string]map[string]interface{}
-	err = json.Unmarshal(result, &data)
-	if err != nil {
-		return nil, err
-	}
+	_ = json.Unmarshal(result, &data)
 	user := User{
 		Id:    data["user"]["id"].(string),
 		Name:  data["user"]["name"].(string),
@@ -100,24 +88,27 @@ func (c *Client) NewUser(name, password, email, tenantId string, enabled bool) (
 
 func (c *Client) NewEc2(userId, tenantId string) (*Ec2, error) {
 	b := bytes.NewBufferString(fmt.Sprintf(`{"tenant_id": "%s"}`, tenantId))
-	request, err := http.NewRequest("POST", c.authUrl+"/users/"+userId+"/credentials/OS-EC2", b)
-	if err != nil {
-		return nil, err
-	}
+	request, _ := http.NewRequest("POST", c.authUrl+"/users/"+userId+"/credentials/OS-EC2", b)
 	request.Header.Set("X-Auth-Token", c.Token)
 	request.Header.Set("Content-Type", "application/json")
 	httpClient := &http.Client{}
-	response, err := httpClient.Do(request)
+	response, _ := httpClient.Do(request)
 	defer response.Body.Close()
 	result, _ := ioutil.ReadAll(response.Body)
 	var data map[string]map[string]interface{}
-	err = json.Unmarshal(result, &data)
-	if err != nil {
-		return nil, err
-	}
+	_ = json.Unmarshal(result, &data)
 	ec2 := Ec2{
 		Access: data["credential"]["access"].(string),
 		Secret: data["credential"]["secret"].(string),
 	}
 	return &ec2, nil
+}
+
+func (c *Client) RemoveEc2(userId, access string) error {
+	request, _ := http.NewRequest("DELETE", c.authUrl+"/users/"+userId+"/credentials/OS-EC2/"+access, nil)
+	request.Header.Set("X-Auth-Token", c.Token)
+	request.Header.Set("Content-Type", "application/json")
+	httpClient := &http.Client{}
+	httpClient.Do(request)
+	return nil
 }
