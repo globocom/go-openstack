@@ -26,6 +26,11 @@ type User struct {
 	Email string
 }
 
+type Ec2 struct {
+	Access string
+	Secret string
+}
+
 func NewClient(username, password, tenantName, authUrl string) (*Client, error) {
 	b := bytes.NewBufferString(fmt.Sprintf(`{"auth": {"passwordCredentials": {"username": "%s", "password":"%s"}, "tenantName": "%s"}}`, username, password, tenantName))
 	response, err := http.Post(authUrl+"/tokens", "application/json", b)
@@ -91,4 +96,28 @@ func (c *Client) NewUser(name, password, email, tenantId string, enabled bool) (
 		Email: data["user"]["email"].(string),
 	}
 	return &user, nil
+}
+
+func (c *Client) NewEc2(userId, tenantId string) (*Ec2, error) {
+	b := bytes.NewBufferString(fmt.Sprintf(`{"tenant_id": "%s"}`, tenantId))
+	request, err := http.NewRequest("POST", c.authUrl+"/users/"+userId+"/credentials/OS-EC2", b)
+	if err != nil {
+		return nil, err
+	}
+	request.Header.Set("X-Auth-Token", c.Token)
+	request.Header.Set("Content-Type", "application/json")
+	httpClient := &http.Client{}
+	response, err := httpClient.Do(request)
+	defer response.Body.Close()
+	result, _ := ioutil.ReadAll(response.Body)
+	var data map[string]map[string]interface{}
+	err = json.Unmarshal(result, &data)
+	if err != nil {
+		return nil, err
+	}
+	ec2 := Ec2{
+		Access: data["credential"]["access"].(string),
+		Secret: data["credential"]["secret"].(string),
+	}
+	return &ec2, nil
 }

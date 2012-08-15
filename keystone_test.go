@@ -47,3 +47,24 @@ func (s *S) TestNewUser(c *C) {
 	c.Assert(user, NotNil)
 	c.Assert(user, DeepEquals, &User{Id: "userId", Name: "Stark", Email: "stark@stark.com"})
 }
+
+func (s *S) TestNewEc2(c *C) {
+	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+	c.Assert(err, IsNil)
+	c.Assert(client, NotNil)
+	testServer.PrepareResponse(200, nil, `{"tenant": {"id": "xpto", "enabled": "true", "name": "name", "description": "desc"}}`)
+	tenant, err := client.NewTenant("name", "desc", true)
+	c.Assert(err, IsNil)
+	c.Assert(tenant, NotNil)
+	testServer.PrepareResponse(200, nil, `{"user": {"id": "userId", "enabled": "true", "name": "Stark", "email": "stark@stark.com"}}`)
+	user, err := client.NewUser("Stark", "mypass", "stark@stark.com", tenant.Id, true)
+	c.Assert(err, IsNil)
+	c.Assert(user, NotNil)
+	c.Assert(user, DeepEquals, &User{Id: "userId", Name: "Stark", Email: "stark@stark.com"})
+	testServer.PrepareResponse(200, nil, `{"credential": {"access": "access", "secret": "secret"}}`)
+	ec2, err := client.NewEc2(user.Id, tenant.Id)
+	c.Assert(err, IsNil)
+	c.Assert(ec2, NotNil)
+	c.Assert(ec2, DeepEquals, &Ec2{Access: "access", Secret: "secret"})
+}
