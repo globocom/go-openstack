@@ -91,3 +91,22 @@ func (s *S) TestRemoveEc2(c *C) {
 	err = client.RemoveEc2(user.Id, ec2.Access)
 	c.Assert(err, IsNil)
 }
+
+func (s *S) TestRemoveUser(c *C) {
+	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+	c.Assert(err, IsNil)
+	c.Assert(client, NotNil)
+	testServer.PrepareResponse(200, nil, `{"tenant": {"id": "xpto", "enabled": "true", "name": "name", "description": "desc"}}`)
+	tenant, err := client.NewTenant("name", "desc", true)
+	c.Assert(err, IsNil)
+	c.Assert(tenant, NotNil)
+	testServer.PrepareResponse(200, nil, `{"user": {"id": "userId", "enabled": "true", "name": "Stark", "email": "stark@stark.com"}}`)
+	user, err := client.NewUser("Stark", "mypass", "stark@stark.com", tenant.Id, true)
+	c.Assert(err, IsNil)
+	c.Assert(user, NotNil)
+	c.Assert(user, DeepEquals, &User{Id: "userId", Name: "Stark", Email: "stark@stark.com"})
+	testServer.PrepareResponse(200, nil, "")
+	err = client.RemoveUser(user.Id)
+	c.Assert(err, IsNil)
+}

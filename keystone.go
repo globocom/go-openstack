@@ -54,7 +54,7 @@ func (c *Client) NewTenant(name, description string, enabled bool) (*Tenant, err
 	request.Header.Set("X-Auth-Token", c.Token)
 	request.Header.Set("Content-Type", "application/json")
 	httpClient := &http.Client{}
-	response, err := httpClient.Do(request)
+	response, _ := httpClient.Do(request)
 	defer response.Body.Close()
 	result, _ := ioutil.ReadAll(response.Body)
 	var data map[string]map[string]interface{}
@@ -73,7 +73,7 @@ func (c *Client) NewUser(name, password, email, tenantId string, enabled bool) (
 	request.Header.Set("X-Auth-Token", c.Token)
 	request.Header.Set("Content-Type", "application/json")
 	httpClient := &http.Client{}
-	response, err := httpClient.Do(request)
+	response, _ := httpClient.Do(request)
 	defer response.Body.Close()
 	result, _ := ioutil.ReadAll(response.Body)
 	var data map[string]map[string]interface{}
@@ -106,6 +106,15 @@ func (c *Client) NewEc2(userId, tenantId string) (*Ec2, error) {
 
 func (c *Client) RemoveEc2(userId, access string) error {
 	request, _ := http.NewRequest("DELETE", c.authUrl+"/users/"+userId+"/credentials/OS-EC2/"+access, nil)
+	request.Header.Set("X-Auth-Token", c.Token)
+	request.Header.Set("Content-Type", "application/json")
+	httpClient := &http.Client{}
+	httpClient.Do(request)
+	return nil
+}
+
+func (c *Client) RemoveUser(userId string) error {
+	request, _ := http.NewRequest("DELETE", c.authUrl+"/users/"+userId, nil)
 	request.Header.Set("X-Auth-Token", c.Token)
 	request.Header.Set("Content-Type", "application/json")
 	httpClient := &http.Client{}
