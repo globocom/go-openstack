@@ -121,3 +121,12 @@ func (c *Client) RemoveUser(userId string) error {
 	httpClient.Do(request)
 	return nil
 }
+
+func (c *Client) RemoveTenant(tenantId string) error {
+	request, _ := http.NewRequest("DELETE", c.authUrl+"/tenants/"+tenantId, nil)
+	request.Header.Set("X-Auth-Token", c.Token)
+	request.Header.Set("Content-Type", "application/json")
+	httpClient := &http.Client{}
+	httpClient.Do(request)
+	return nil
+}

@@ -110,3 +110,17 @@ func (s *S) TestRemoveUser(c *C) {
 	err = client.RemoveUser(user.Id)
 	c.Assert(err, IsNil)
 }
+
+func (s *S) TestRemoveTenant(c *C) {
+	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+	c.Assert(err, IsNil)
+	c.Assert(client, NotNil)
+	testServer.PrepareResponse(200, nil, `{"tenant": {"id": "xpto", "enabled": "true", "name": "name", "description": "desc"}}`)
+	tenant, err := client.NewTenant("name", "desc", true)
+	c.Assert(err, IsNil)
+	c.Assert(tenant, NotNil)
+	testServer.PrepareResponse(200, nil, "")
+	err = client.RemoveTenant(tenant.Id)
+	c.Assert(err, IsNil)
+}
