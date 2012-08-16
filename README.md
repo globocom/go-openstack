@@ -1,6 +1,8 @@
 Go keystone client
 ==================
 
+[![Build Status](https://secure.travis-ci.org/timeredbull/keystone.png?branch=master)](http://travis-ci.org/timeredbull/keystone)
+
 This is a go client for the OpenStack Keystone 2.0 API.
 
 By way of a quick-start:
