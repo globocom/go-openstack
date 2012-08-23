@@ -90,6 +90,7 @@ func (c *Client) NewUser(name, password, email, tenantId, roleId string, enabled
 		Name:  data["user"]["name"].(string),
 		Email: data["user"]["email"].(string),
 	}
+	// http://nova.nimbus.dev.globoi.com:35357/v2.0/tenants/d34f63dc72904510a5b3dd25bee6ceaf/users/ce038d17773a4e398df562aa121b7923/roles/OS-KSADM/b07bef22c3264c2f8a4c434eee912b4c
 	response, err = c.do("PUT", c.authUrl+"/tenants/"+tenantId+"/users/"+user.Id+"/roles/OS-KSADM/"+roleId, nil)
 	if err != nil {
 		panic(err)
@@ -116,7 +117,7 @@ func (c *Client) RemoveEc2(userId, access string) error {
 }
 
 func (c *Client) RemoveUser(userId, tenantId, roleId string) error {
-	if err := c.delete(c.authUrl + "/tenant/" + tenantId + "/user/" + userId + "/roles/OS-KSADM/" + roleId); err != nil {
+	if err := c.delete(c.authUrl + "/tenants/" + tenantId + "/users/" + userId + "/roles/OS-KSADM/" + roleId); err != nil {
 		return err
 	}
 	return c.delete(c.authUrl + "/users/" + userId)
