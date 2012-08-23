@@ -102,25 +102,19 @@ func (c *Client) NewEc2(userId, tenantId string) (*Ec2, error) {
 }
 
 func (c *Client) RemoveEc2(userId, access string) error {
-	if resp, err := c.do("DELETE", c.authUrl+"/users/"+userId+"/credentials/OS-EC2/"+access, nil); err != nil {
-		return err
-	} else if resp.StatusCode > 299 {
-		return errorFromResponse(resp)
-	}
-	return nil
+	return c.delete(c.authUrl+"/users/"+userId+"/credentials/OS-EC2/"+access)
 }
 
 func (c *Client) RemoveUser(userId string) error {
-	if resp, err := c.do("DELETE", c.authUrl+"/users/"+userId, nil); err != nil {
-		return err
-	} else if resp.StatusCode > 299 {
-		return errorFromResponse(resp)
-	}
-	return nil
+	return c.delete(c.authUrl+"/users/"+userId)
 }
 
 func (c *Client) RemoveTenant(tenantId string) error {
-	if resp, err := c.do("DELETE", c.authUrl+"/tenants/"+tenantId, nil); err != nil {
+	return c.delete(c.authUrl+"/tenants/"+tenantId)
+}
+
+func (c *Client) delete(url string) error {
+	if resp, err := c.do("DELETE", url, nil); err != nil {
 		return err
 	} else if resp.StatusCode > 299 {
 		return errorFromResponse(resp)
