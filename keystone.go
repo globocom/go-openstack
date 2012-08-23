@@ -102,16 +102,37 @@ func (c *Client) NewEc2(userId, tenantId string) (*Ec2, error) {
 }
 
 func (c *Client) RemoveEc2(userId, access string) error {
-	c.do("DELETE", c.authUrl+"/users/"+userId+"/credentials/OS-EC2/"+access, nil)
+	if resp, err := c.do("DELETE", c.authUrl+"/users/"+userId+"/credentials/OS-EC2/"+access, nil); err != nil {
+		return err
+	} else if resp.StatusCode > 299 {
+		return errorFromResponse(resp)
+	}
 	return nil
 }
 
 func (c *Client) RemoveUser(userId string) error {
-	c.do("DELETE", c.authUrl+"/users/"+userId, nil)
+	if resp, err := c.do("DELETE", c.authUrl+"/users/"+userId, nil); err != nil {
+		return err
+	} else if resp.StatusCode > 299 {
+		return errorFromResponse(resp)
+	}
 	return nil
 }
 
 func (c *Client) RemoveTenant(tenantId string) error {
-	c.do("DELETE", c.authUrl+"/tenants/"+tenantId, nil)
+	if resp, err := c.do("DELETE", c.authUrl+"/tenants/"+tenantId, nil); err != nil {
+		return err
+	} else if resp.StatusCode > 299 {
+		return errorFromResponse(resp)
+	}
 	return nil
+}
+
+func errorFromResponse(response *http.Response) error {
+	defer response.Body.Close()
+	b, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		return err
+	}
+	return errors.New(string(b))
 }

@@ -92,6 +92,15 @@ func (s *S) TestRemoveEc2(c *C) {
 	c.Assert(err, IsNil)
 }
 
+func (s *S) TestRemoveEc2ReturnErrorIfItFailsToRemoveCredentials(c *C) {
+	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	client, _ := NewClient("username", "pass", "admin", "http://localhost:4444")
+	testServer.PrepareResponse(500, nil, "Failed to remove credential.")
+	err := client.RemoveEc2("stark123", "access-key")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, "^Failed to remove credential.$")
+}
+
 func (s *S) TestRemoveUser(c *C) {
 	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
@@ -111,16 +120,37 @@ func (s *S) TestRemoveUser(c *C) {
 	c.Assert(err, IsNil)
 }
 
+func (s *S) TestRemoveUserReturnErrorIfItFailsToReturnUser(c *C) {
+	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	client, _ := NewClient("username", "pass", "admin", "http://localhost:4444")
+	testServer.PrepareResponse(500, nil, "Failed to remove user.")
+	err := client.RemoveUser("start123")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, "^Failed to remove user.$")
+}
+
 func (s *S) TestRemoveTenant(c *C) {
 	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)
-	testServer.PrepareResponse(200, nil, `{"tenant": {"id": "xpto", "enabled": "true", "name": "name", "description": "desc"}}`)
+	body := `{"tenant": {"id": "xpto", "enabled": "true", "name": "name", "description": "desc"}}`
+	testServer.PrepareResponse(200, nil, body)
 	tenant, err := client.NewTenant("name", "desc", true)
 	c.Assert(err, IsNil)
 	c.Assert(tenant, NotNil)
 	testServer.PrepareResponse(200, nil, "")
 	err = client.RemoveTenant(tenant.Id)
 	c.Assert(err, IsNil)
+}
+
+func (s *S) TestRemoveTenantReturnErrorIfItFailsToRemoveATenant(c *C) {
+	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	client, err := NewClient("username", "pass", "admin", testServer.URL)
+	c.Assert(err, IsNil)
+	c.Assert(client, NotNil)
+	testServer.PrepareResponse(500, nil, "Failed to delete tenant.")
+	err = client.RemoveTenant("uuid123")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, "^Failed to delete tenant.$")
 }
