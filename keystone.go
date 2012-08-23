@@ -55,7 +55,9 @@ func NewClient(username, password, tenantName, authUrl string) (*Client, error) 
 func (c *Client) do(method, urlStr string, body io.Reader) (*http.Response, error) {
 	request, _ := http.NewRequest(method, urlStr, body)
 	request.Header.Set("X-Auth-Token", c.Token)
-	request.Header.Set("Content-Type", "application/json")
+	if body != nil {
+		request.Header.Set("Content-Type", "application/json")
+	}
 	httpClient := &http.Client{}
 	return httpClient.Do(request)
 }
