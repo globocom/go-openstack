@@ -1,11 +1,9 @@
 package keystone
 
 import (
-	"fmt"
 	. "launchpad.net/gocheck"
 	"net/http"
 	"net/url"
-	"os"
 	"testing"
 	"time"
 )
@@ -58,10 +56,8 @@ func (s *TestHTTPServer) Start() {
 		if err == nil && resp.StatusCode == 202 {
 			break
 		}
-		fmt.Fprintf(os.Stderr, "\nWating for fake server start... ")
 		time.Sleep(1e8)
 	}
-	fmt.Fprintf(os.Stderr, "started\n\n")
 	s.WaitRequest()
 }
 
