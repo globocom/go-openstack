@@ -119,14 +119,15 @@ func (c *Client) RemoveEc2(userId, access string) error {
 }
 
 func (c *Client) RemoveUser(userId, tenantId, roleId string) error {
-	if err := c.delete(c.authUrl + "/tenants/" + tenantId + "/users/" + userId + "/roles/OS-KSADM/" + roleId); err != nil {
-		return err
-	}
+	// FIXME(fsouza): deal with errors. Keystone keep returning malformed response.
+	c.delete(c.authUrl + "/tenants/" + tenantId + "/users/" + userId + "/roles/OS-KSADM/" + roleId)
 	return c.delete(c.authUrl + "/users/" + userId)
 }
 
 func (c *Client) RemoveTenant(tenantId string) error {
-	return c.delete(c.authUrl + "/tenants/" + tenantId)
+	// FIXME(fsouza): deal with errors. Keystone keep returning malformed response.
+	c.delete(c.authUrl + "/tenants/" + tenantId)
+	return nil
 }
 
 func (c *Client) delete(url string) error {
