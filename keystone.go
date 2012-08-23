@@ -35,6 +35,9 @@ type Ec2 struct {
 func NewClient(username, password, tenantName, authUrl string) (*Client, error) {
 	b := bytes.NewBufferString(fmt.Sprintf(`{"auth": {"passwordCredentials": {"username": "%s", "password":"%s"}, "tenantName": "%s"}}`, username, password, tenantName))
 	response, err := http.Post(authUrl+"/tokens", "application/json", b)
+	if err != nil {
+		panic(err)
+	}
 	defer response.Body.Close()
 	result, _ := ioutil.ReadAll(response.Body)
 	var data map[string]map[string]interface{}
@@ -72,9 +75,12 @@ func (c *Client) NewTenant(name, description string, enabled bool) (*Tenant, err
 	return &tenant, nil
 }
 
-func (c *Client) NewUser(name, password, email, tenantId string, enabled bool) (*User, error) {
+func (c *Client) NewUser(name, password, email, tenantId, roleId string, enabled bool) (*User, error) {
 	b := bytes.NewBufferString(fmt.Sprintf(`{"user": {"name": "%s", "password": "%s", "tenantId": "%s", "email": "%s", "enabled": %t}}`, name, password, tenantId, email, enabled))
-	response, _ := c.do("POST", c.authUrl+"/users", b)
+	response, err := c.do("POST", c.authUrl+"/users", b)
+	if err != nil {
+		return nil, err
+	}
 	defer response.Body.Close()
 	result, _ := ioutil.ReadAll(response.Body)
 	var data map[string]map[string]interface{}
@@ -83,6 +89,10 @@ func (c *Client) NewUser(name, password, email, tenantId string, enabled bool) (
 		Id:    data["user"]["id"].(string),
 		Name:  data["user"]["name"].(string),
 		Email: data["user"]["email"].(string),
+	}
+	response, err = c.do("PUT", c.authUrl+"/tenants/"+tenantId+"/users/"+user.Id+"/roles/OS-KSADM/"+roleId, nil)
+	if err != nil {
+		panic(err)
 	}
 	return &user, nil
 }
@@ -102,15 +112,18 @@ func (c *Client) NewEc2(userId, tenantId string) (*Ec2, error) {
 }
 
 func (c *Client) RemoveEc2(userId, access string) error {
-	return c.delete(c.authUrl+"/users/"+userId+"/credentials/OS-EC2/"+access)
+	return c.delete(c.authUrl + "/users/" + userId + "/credentials/OS-EC2/" + access)
 }
 
-func (c *Client) RemoveUser(userId string) error {
-	return c.delete(c.authUrl+"/users/"+userId)
+func (c *Client) RemoveUser(userId, tenantId, roleId string) error {
+	if err := c.delete(c.authUrl + "/tenant/" + tenantId + "/user/" + userId + "/roles/OS-KSADM/" + roleId); err != nil {
+		return err
+	}
+	return c.delete(c.authUrl + "/users/" + userId)
 }
 
 func (c *Client) RemoveTenant(tenantId string) error {
-	return c.delete(c.authUrl+"/tenants/"+tenantId)
+	return c.delete(c.authUrl + "/tenants/" + tenantId)
 }
 
 func (c *Client) delete(url string) error {
