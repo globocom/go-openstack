@@ -1,6 +1,7 @@
 package keystone
 
 import (
+	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"net/http"
 	"net/url"
@@ -10,7 +11,9 @@ import (
 
 var _ = Suite(&S{})
 
-type S struct{}
+type S struct {
+	response string
+}
 
 func Test(t *testing.T) { TestingT(t) }
 
@@ -18,6 +21,9 @@ var testServer = NewTestHTTPServer("http://localhost:4444")
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
+	body, err := ioutil.ReadFile("testdata/response.json")
+	c.Assert(err, IsNil)
+	s.response = string(body)
 }
 
 func (s *S) TearDownTest(c *C) {

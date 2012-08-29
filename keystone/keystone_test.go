@@ -13,15 +13,19 @@ func (s *S) TestAuthFailure(c *C) {
 }
 
 func (s *S) TestAuth(c *C) {
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
-	client, err := NewClient("username", "pass", "tenantname", "http://localhost:4444")
+	testServer.PrepareResponse(200, nil, s.response)
+	client, err := NewClient("username", "pass", "tenantname", testServer.URL)
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)
-	c.Assert(client, DeepEquals, &Client{Token: "secret", authUrl: "http://localhost:4444"})
+	c.Assert(client.Token, Equals, "secret")
+	c.Assert(client.authUrl, Equals, "http://localhost:4444")
+	c.Assert(client.Catalogs, HasLen, 7)
+	c.Assert(client.Catalogs[0].Name, Equals, "Compute Service")
+	c.Assert(client.Catalogs[0].Type, Equals, "compute")
 }
 
 func (s *S) TestNewTenant(c *C) {
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)
@@ -33,7 +37,7 @@ func (s *S) TestNewTenant(c *C) {
 }
 
 func (s *S) TestNewUser(c *C) {
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)
@@ -46,7 +50,7 @@ func (s *S) TestNewUser(c *C) {
 }
 
 func (s *S) TestNewEc2(c *C) {
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)
@@ -58,7 +62,7 @@ func (s *S) TestNewEc2(c *C) {
 }
 
 func (s *S) TestRemoveEc2(c *C) {
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)
@@ -68,7 +72,7 @@ func (s *S) TestRemoveEc2(c *C) {
 }
 
 func (s *S) TestRemoveEc2ReturnErrorIfItFailsToRemoveCredentials(c *C) {
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, _ := NewClient("username", "pass", "admin", "http://localhost:4444")
 	testServer.PrepareResponse(500, nil, "Failed to remove credential.")
 	err := client.RemoveEc2("stark123", "access-key")
@@ -77,7 +81,7 @@ func (s *S) TestRemoveEc2ReturnErrorIfItFailsToRemoveCredentials(c *C) {
 }
 
 func (s *S) TestRemoveUser(c *C) {
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)
@@ -88,7 +92,7 @@ func (s *S) TestRemoveUser(c *C) {
 }
 
 func (s *S) TestRemoveUserReturnErrorIfItFailsToRemoveUser(c *C) {
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, _ := NewClient("username", "pass", "admin", "http://localhost:4444")
 	testServer.PrepareResponse(200, nil, "")
 	testServer.PrepareResponse(500, nil, "Failed to remove user.")
@@ -101,7 +105,7 @@ func (s *S) TestRemoveUserReturnErrorIfItFailsToRemoveTheRole(c *C) {
 	// TODO(fsouza): re-enable this test when keystone start work like a real
 	// HTTP server (see the FIXME note in the RemoveUser function).
 	c.SucceedNow()
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, _ := NewClient("username", "pass", "admin", "http://localhost:4444")
 	testServer.PrepareResponse(500, nil, "Failed to remove the role.")
 	err := client.RemoveUser("start123", "tenant", "member123")
@@ -110,7 +114,7 @@ func (s *S) TestRemoveUserReturnErrorIfItFailsToRemoveTheRole(c *C) {
 }
 
 func (s *S) TestRemoveTenant(c *C) {
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)
@@ -128,7 +132,7 @@ func (s *S) TestRemoveTenantReturnErrorIfItFailsToRemoveATenant(c *C) {
 	// TODO(fsouza): re-enable this test when keystone start work like a real
 	// HTTP server (see the FIXME note in the RemoveTenant function).
 	c.SucceedNow()
-	testServer.PrepareResponse(200, nil, `{"access": {"token": {"id": "secret"}}}`)
+	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", testServer.URL)
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)

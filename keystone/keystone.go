@@ -10,9 +10,16 @@ import (
 	"net/http"
 )
 
+type ServiceCatalog struct {
+	Endpoints []map[string]string
+	Type      string
+	Name      string
+}
+
 type Client struct {
-	Token   string
-	authUrl string
+	Token    string
+	Catalogs []ServiceCatalog
+	authUrl  string
 }
 
 type Tenant struct {
@@ -49,7 +56,24 @@ func NewClient(username, password, tenantName, authUrl string) (*Client, error) 
 		return nil, errors.New(data["error"]["title"].(string))
 	}
 	token := data["access"]["token"].(map[string]interface{})["id"].(string)
-	return &Client{Token: token, authUrl: authUrl}, nil
+	client := Client{Token: token, authUrl: authUrl}
+	catalogs := data["access"]["serviceCatalog"].([]interface{})
+	for _, c := range catalogs {
+		catalog := c.(map[string]interface{})
+		serviceCatalog := ServiceCatalog{
+			Name: catalog["name"].(string),
+			Type: catalog["type"].(string),
+		}
+		for _, e := range catalog["endpoints"].([]interface{}) {
+			endpoint := map[string]string{}
+			for k, v := range e.(map[string]interface{}) {
+				endpoint[k] = v.(string)
+			}
+			serviceCatalog.Endpoints = append(serviceCatalog.Endpoints, endpoint)
+		}
+		client.Catalogs = append(client.Catalogs, serviceCatalog)
+	}
+	return &client, nil
 }
 
 func (c *Client) do(method, urlStr string, body io.Reader) (*http.Response, error) {
