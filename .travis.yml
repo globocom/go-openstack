@@ -5,4 +5,4 @@ before_install:
 install:
   - go get launchpad.net/gocheck
 script:
-  - go test
+  - cd keystone && go test
