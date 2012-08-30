@@ -8,6 +8,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"strings"
 )
 
 type ServiceCatalog struct {
@@ -74,6 +75,25 @@ func NewClient(username, password, tenantName, authUrl string) (*Client, error) 
 		client.Catalogs = append(client.Catalogs, serviceCatalog)
 	}
 	return &client, nil
+}
+
+func (c *Client) Endpoint(service, which string) string {
+	var (
+		endpoint string
+		catalog  ServiceCatalog
+	)
+	for _, catalog = range c.Catalogs {
+		if catalog.Type == service {
+			break
+		}
+	}
+	if catalog.Type == service {
+		if !strings.Contains(which, "URL") {
+			which += "URL"
+		}
+		endpoint = catalog.Endpoints[0][which] // TODO(fsouza): choose region
+	}
+	return endpoint
 }
 
 func (c *Client) do(method, urlStr string, body io.Reader) (*http.Response, error) {

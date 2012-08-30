@@ -24,6 +24,15 @@ func (s *S) TestAuth(c *C) {
 	c.Assert(client.Catalogs[0].Type, Equals, "compute")
 }
 
+func (s *S) TestEndpoint(c *C) {
+	testServer.PrepareResponse(200, nil, s.response)
+	client, err := NewClient("username", "pass", "tenantname", testServer.URL)
+	c.Assert(err, IsNil)
+	c.Assert(client.Endpoint("compute", "admin"), Equals, "http://nova.mycloud.com:8774/v2/xpto")
+	c.Assert(client.Endpoint("compute", "adminURL"), Equals, "http://nova.mycloud.com:8774/v2/xpto")
+	c.Assert(client.Endpoint("sempute", "admin"), Equals, "")
+}
+
 func (s *S) TestNewTenant(c *C) {
 	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
