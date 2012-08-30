@@ -65,7 +65,9 @@ func (c *Client) DisassociateNetwork(tenantId string) error {
 			break
 		}
 	}
-	// TODO(fsouza): return error if the tenant does not have any network (netId == "").
+	if netId == "" {
+		return errors.New("Network not found: no network was found for this tenant.")
+	}
 	reqBody := strings.NewReader(`{"disassociate":null}`)
 	req, err = http.NewRequest("POST", endpoint+"/os-networks/"+netId+"/action", reqBody)
 	req.Header.Set("Accept", "application/json")
