@@ -15,7 +15,7 @@ type S struct {
 
 func Test(t *testing.T) { TestingT(t) }
 
-var testServer = ostesting.NewTestHTTPServer("http://localhost:4444")
+var testServer = ostesting.NewTestHTTPServer("http://localhost:4444", 10e9)
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()

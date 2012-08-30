@@ -3,6 +3,7 @@ package testing
 import (
 	"errors"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"net/url"
 	"time"
@@ -16,6 +17,7 @@ type TestHTTPServer struct {
 	request  chan *http.Request
 	response chan *testResponse
 	body     chan []byte
+	timeout  time.Duration
 }
 
 type testResponse struct {
@@ -24,8 +26,8 @@ type testResponse struct {
 	Body    string
 }
 
-func NewTestHTTPServer(url string) *TestHTTPServer {
-	return &TestHTTPServer{URL: url}
+func NewTestHTTPServer(url string, responseTimout time.Duration) *TestHTTPServer {
+	return &TestHTTPServer{URL: url, timeout: responseTimout}
 }
 
 func (s *TestHTTPServer) Start() {
@@ -64,7 +66,11 @@ func (s *TestHTTPServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	s.body <- b
 	s.request <- req
 	var resp *testResponse
-	resp = <-s.response
+	select {
+	case resp = <-s.response:
+	case <-time.After(s.timeout):
+		log.Panicf("No response from server after %s.", s.timeout)
+	}
 	if resp.Status != 0 {
 		w.WriteHeader(resp.Status)
 	}
