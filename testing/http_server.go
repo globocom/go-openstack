@@ -2,16 +2,20 @@ package testing
 
 import (
 	"errors"
+	"io/ioutil"
 	"net/http"
 	"net/url"
 	"time"
 )
+
+const ChanSize = 64
 
 type TestHTTPServer struct {
 	URL      string
 	started  bool
 	request  chan *http.Request
 	response chan *testResponse
+	body     chan []byte
 }
 
 type testResponse struct {
@@ -29,8 +33,9 @@ func (s *TestHTTPServer) Start() {
 		return
 	}
 	s.started = true
-	s.request = make(chan *http.Request, 64)
-	s.response = make(chan *testResponse, 64)
+	s.request = make(chan *http.Request, ChanSize)
+	s.response = make(chan *testResponse, ChanSize)
+	s.body = make(chan []byte, ChanSize)
 	url, _ := url.Parse(s.URL)
 	go http.ListenAndServe(url.Host, s)
 	s.PrepareResponse(202, nil, "Nothing.")
@@ -55,6 +60,8 @@ func (s *TestHTTPServer) FlushRequests() {
 }
 
 func (s *TestHTTPServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+	b, _ := ioutil.ReadAll(req.Body)
+	s.body <- b
 	s.request <- req
 	var resp *testResponse
 	resp = <-s.response
@@ -64,14 +71,14 @@ func (s *TestHTTPServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(resp.Body))
 }
 
-func (s *TestHTTPServer) WaitRequest(timeout time.Duration) (*http.Request, error) {
+func (s *TestHTTPServer) WaitRequest(timeout time.Duration) (*http.Request, []byte, error) {
 	select {
 	case req := <-s.request:
-		req.ParseForm()
-		return req, nil
+		b := <-s.body
+		return req, b, nil
 	case <-time.After(timeout):
 	}
-	return nil, errors.New("timed out")
+	return nil, nil, errors.New("timed out")
 }
 
 func (s *TestHTTPServer) PrepareResponse(status int, headers map[string]string, body string) {
