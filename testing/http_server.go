@@ -1,6 +1,7 @@
 package testing
 
 import (
+	"errors"
 	"net/http"
 	"net/url"
 	"time"
@@ -40,7 +41,7 @@ func (s *TestHTTPServer) Start() {
 		}
 		time.Sleep(1e8)
 	}
-	s.WaitRequest()
+	s.WaitRequest(1e18)
 }
 
 func (s *TestHTTPServer) FlushRequests() {
@@ -63,10 +64,14 @@ func (s *TestHTTPServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	w.Write([]byte(resp.Body))
 }
 
-func (s *TestHTTPServer) WaitRequest() *http.Request {
-	req := <-s.request
-	req.ParseForm()
-	return req
+func (s *TestHTTPServer) WaitRequest(timeout time.Duration) (*http.Request, error) {
+	select {
+	case req := <-s.request:
+		req.ParseForm()
+		return req, nil
+	case <-time.After(timeout):
+	}
+	return nil, errors.New("timed out")
 }
 
 func (s *TestHTTPServer) PrepareResponse(status int, headers map[string]string, body string) {
