@@ -86,7 +86,7 @@ func (s *S) TestDisassociateNetworkForTenantWithoutNetwork(c *C) {
 	client := Client{KeystoneClient: &kclient}
 	err := client.DisassociateNetwork("123tenantsojfdkw")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, "^Network not found: no network was found for this tenant.$")
+	c.Assert(err, DeepEquals, ErrNoNetwork)
 }
 
 func (s *S) TestDisassociateNetworkWithoutKeystoneClient(c *C) {

@@ -12,6 +12,10 @@ import (
 	"strings"
 )
 
+// Error returned by DisassociateNetwork when no network is found for the
+// tenant.
+var ErrNoNetwork = errors.New("Network not found: no network was found for this tenant.")
+
 // NetworkDisassociator interface provides the method DisassociateNetwork, that
 // is used to disassociate a network from a tenant.
 type NetworkDisassociator interface {
@@ -76,7 +80,7 @@ func (c *Client) DisassociateNetwork(tenantId string) error {
 		}
 	}
 	if netId == "" {
-		return errors.New("Network not found: no network was found for this tenant.")
+		return ErrNoNetwork
 	}
 	reqBody := strings.NewReader(`{"disassociate":null}`)
 	req, err = http.NewRequest("POST", endpoint+"/os-networks/"+netId+"/action", reqBody)
