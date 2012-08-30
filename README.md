@@ -8,11 +8,13 @@ This is a go client for the OpenStack APIs.
 Currently it works with Keystone 2.0 API and Nova API (in keystone and nova
 subpackages).
 
-By way of a quick-start, Keystone client:
+By way of a quick-start:
 
 ```go
 // use v2.0 auth with http://example.com:35357/v2.0")
-client, err := NewClient("username", "pass", "admin", "http://example.com:35357/v2.0")
-tenant, err := client.NewTenant("name", "desc", true)
-client.RemoveTenant(tenant.Id)
+keystoneClient, err := keystone.NewClient("username", "pass", "admin", "http://example.com:35357/v2.0")
+tenant, err := keystoneClient.NewTenant("name", "desc", true)
+novaClient := nova.Client{KeystoneClient: keystoneClient}
+novaClient.DisassociateNetwork(tenant.Id)
+keystoneClient.RemoveTenant(tenant.Id)
 ```
