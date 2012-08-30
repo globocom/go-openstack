@@ -1,7 +1,7 @@
 package keystone
 
 import (
-	os_testing "github.com/timeredbull/openstack/testing"
+	ostesting "github.com/timeredbull/openstack/testing"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"testing"
@@ -15,7 +15,7 @@ type S struct {
 
 func Test(t *testing.T) { TestingT(t) }
 
-var testServer = os_testing.NewTestHTTPServer("http://localhost:4444")
+var testServer = ostesting.NewTestHTTPServer("http://localhost:4444")
 
 func (s *S) SetUpSuite(c *C) {
 	testServer.Start()
