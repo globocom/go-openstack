@@ -1,3 +1,5 @@
+// Package nova provides types, methods and functions for interacting with Nova
+// OS API v2.
 package nova
 
 import (
@@ -10,7 +12,10 @@ import (
 	"strings"
 )
 
+// NetworkDisassociator interface provides the method DisassociateNetwork, that
+// is used to disassociate a network from a tenant.
 type NetworkDisassociator interface {
+	// Disassociates a network from the given tenant.
 	DisassociateNetwork(tenantId string) error
 }
 
@@ -19,6 +24,9 @@ type network struct {
 	TenantId string `json:"project_id"`
 }
 
+// Client represents a client for the Nova OS API. It encapsulates a
+// keystone.Client instance that provides the token and endpoints used by this
+// client.
 type Client struct {
 	KeystoneClient *keystone.Client
 }
@@ -37,6 +45,8 @@ func (c *Client) do(req *http.Request) ([]byte, int, error) {
 	return b, resp.StatusCode, err
 }
 
+// DisassociateNetwork disassociates a network from the given tenant, returning
+// an error in case of any failure.
 func (c *Client) DisassociateNetwork(tenantId string) error {
 	if c.KeystoneClient == nil {
 		return errors.New("KeystoneClient is nil.")
