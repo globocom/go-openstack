@@ -1,5 +1,5 @@
-// Package nova provides types, methods and functions for interacting with Nova
-// OS API v2.
+// Package nova provides types, methods and functions for interactions with the
+// Nova OS API v2.
 package nova
 
 import (

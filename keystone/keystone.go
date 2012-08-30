@@ -1,4 +1,4 @@
-// Package keystone provides types, methods and functions for interactin with
+// Package keystone provides types, methods and functions for interactions with
 // Keystone API v2.0. It allows a developer to create and delete tenants, users
 // and EC2 credentials (access key and secret key).
 //
