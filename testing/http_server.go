@@ -18,7 +18,7 @@ type TestHTTPServer struct {
 	URL string
 
 	started  bool
-	request  chan *http.Request
+	Request  chan *http.Request
 	response chan *testResponse
 	body     chan []byte
 	timeout  time.Duration
@@ -53,7 +53,7 @@ func (s *TestHTTPServer) Start() {
 		return
 	}
 	s.started = true
-	s.request = make(chan *http.Request, ChanSize)
+	s.Request = make(chan *http.Request, ChanSize)
 	s.response = make(chan *testResponse, ChanSize)
 	s.body = make(chan []byte, ChanSize)
 	url, _ := url.Parse(s.URL)
@@ -75,7 +75,7 @@ func (s *TestHTTPServer) Start() {
 func (s *TestHTTPServer) FlushRequests() {
 	for {
 		select {
-		case <-s.request:
+		case <-s.Request:
 		default:
 			return
 		}
@@ -89,7 +89,7 @@ func (s *TestHTTPServer) FlushRequests() {
 func (s *TestHTTPServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	b, _ := ioutil.ReadAll(req.Body)
 	s.body <- b
-	s.request <- req
+	s.Request <- req
 	var resp *testResponse
 	select {
 	case resp = <-s.response:
@@ -115,7 +115,7 @@ func (s *TestHTTPServer) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 // server.
 func (s *TestHTTPServer) WaitRequest(timeout time.Duration) (*http.Request, []byte, error) {
 	select {
-	case req := <-s.request:
+	case req := <-s.Request:
 		b := <-s.body
 		return req, b, nil
 	case <-time.After(timeout):
