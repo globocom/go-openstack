@@ -71,7 +71,7 @@ func (s *S) TestNewEc2(c *C) {
 	c.Assert(ec2, DeepEquals, &Ec2{Access: "access", Secret: "secret"})
 }
 
-func (s *S) TestUserAddRole(c *C) {
+func (s *S) TestAddRoleToUser(c *C) {
 	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
 	c.Assert(err, IsNil)
@@ -84,6 +84,17 @@ func (s *S) TestUserAddRole(c *C) {
 	request = <-testServer.Request
 	expectedUrl := "/tenants/tenant-uuid-567/users/user-uuid4321/roles/OS-KSADM/role-uuid-1234"
 	c.Assert(request.URL.Path, Equals, expectedUrl)
+}
+
+func (s *S) TestAddRoleToUserFailure(c *C) {
+	testServer.PrepareResponse(200, nil, s.response)
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+	c.Assert(err, IsNil)
+	c.Assert(client, NotNil)
+	testServer.PrepareResponse(500, nil, "")
+	err = client.AddRoleToUser("tenant-uuid-567", "user-uuid4321", "role-uuid-1234")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, "^Error while performing request: 500.*")
 }
 
 func (s *S) TestRemoveEc2(c *C) {
