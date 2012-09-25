@@ -69,21 +69,6 @@ type User struct {
 	Email string
 }
 
-// AddRoleToUser associates a role with a user and tenant
-// Returns an error in case of failure
-func (c *Client) AddRoleToUser(tenant_id, user_id, role_id string) error {
-	roleUrl := fmt.Sprintf("/tenants/%s/users/%s/roles/OS-KSADM/%s", tenant_id, user_id, role_id)
-	r, err := c.do("PUT", c.authUrl+roleUrl, nil)
-	if err != nil {
-		return err
-	}
-	if r.StatusCode > 399 {
-		b, _ := ioutil.ReadAll(r.Body)
-		return fmt.Errorf("Error while performing request: %d, %s", r.StatusCode, string(b))
-	}
-	return nil
-}
-
 // Ec2 represents a EC2 credential pair, containing an access key and a secret
 // key.
 type Ec2 struct {
@@ -251,11 +236,32 @@ func (c *Client) NewEc2(userId, tenantId string) (*Ec2, error) {
 	return &ec2, nil
 }
 
+// AddRoleToUser associates a role with a user and tenant
+// Returns an error in case of failure
+func (c *Client) AddRoleToUser(tenantId, userId, roleId string) error {
+	url := fmt.Sprintf("%s/tenants/%s/users/%s/roles/OS-KSADM/%s", c.authUrl, tenantId, userId, roleId)
+	r, err := c.do("PUT", url, nil)
+	if err != nil {
+		return err
+	}
+	if r.StatusCode > 399 {
+		b, _ := ioutil.ReadAll(r.Body)
+		return fmt.Errorf("Error while performing request: %d, %s", r.StatusCode, string(b))
+	}
+	return nil
+}
+
 // RemoveEc2 removes an EC2 credentials pair from a giver user. To remove an
 // EC2 credential, you need to provide the user that owns it and the access key
 // (the secret key is not necessary).
 func (c *Client) RemoveEc2(userId, access string) error {
 	return c.delete(c.authUrl + "/users/" + userId + "/credentials/OS-EC2/" + access)
+}
+
+func (c *Client) RemoveRoleFromUser(tenantId, userId, roleId string) error {
+	url := fmt.Sprintf("%s/tenants/%s/users/%s/roles/OS-KSADM/%s", c.authUrl, tenantId, userId, roleId)
+	c.delete(url)
+	return nil
 }
 
 // RemoveUser removes a user. You need also to provide a tenant and a role, so

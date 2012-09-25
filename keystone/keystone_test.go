@@ -128,11 +128,27 @@ func (s *S) TestRemoveEc2(c *C) {
 
 func (s *S) TestRemoveEc2ReturnErrorIfItFailsToRemoveCredentials(c *C) {
 	testServer.PrepareResponse(200, nil, s.response)
-	client, _ := NewClient("username", "pass", "admin", "http://localhost:4444")
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+	c.Assert(err, IsNil)
 	testServer.PrepareResponse(500, nil, "Failed to remove credential.")
-	err := client.RemoveEc2("stark123", "access-key")
+	err = client.RemoveEc2("stark123", "access-key")
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, "^Failed to remove credential.$")
+}
+
+func (s *S) TestRemoveRoleFromUser(c *C) {
+	testServer.PrepareResponse(200, nil, s.response)
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+	c.Assert(err, IsNil)
+	testServer.FlushRequests()
+	testServer.PrepareResponse(200, nil, "")
+	err = client.RemoveRoleFromUser("tenant-uuid", "user-uuid", "role-uuid")
+	c.Assert(err, IsNil)
+	var request *http.Request
+	request = <-testServer.Request
+	expectedUrl := "/tenants/tenant-uuid/users/user-uuid/roles/OS-KSADM/role-uuid"
+	c.Assert(request.URL.Path, Equals, expectedUrl)
+	c.Assert(request.Method, Equals, "DELETE")
 }
 
 func (s *S) TestRemoveUser(c *C) {
