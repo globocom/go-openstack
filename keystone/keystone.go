@@ -69,6 +69,14 @@ type User struct {
 	Email string
 }
 
+// AddRoleToUser associates a role with a user and tenant
+// Returns an error in case of failure
+func (c *Client) AddRoleToUser(user_id, tenant_id, role_id string) error {
+	roleUrl := fmt.Sprintf("/tenants/%s/users/%s/roles/OS-KSADM/%s", tenant_id, user_id, role_id)
+	_, err := c.do("PUT", c.authUrl+roleUrl, nil)
+	return err
+}
+
 // Ec2 represents a EC2 credential pair, containing an access key and a secret
 // key.
 type Ec2 struct {

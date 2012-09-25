@@ -2,6 +2,7 @@ package keystone
 
 import (
 	. "launchpad.net/gocheck"
+	"net/http"
 )
 
 func (s *S) TestAuthFailure(c *C) {
@@ -68,6 +69,21 @@ func (s *S) TestNewEc2(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(ec2, NotNil)
 	c.Assert(ec2, DeepEquals, &Ec2{Access: "access", Secret: "secret"})
+}
+
+func (s *S) TestUserAddRole(c *C) {
+	testServer.PrepareResponse(200, nil, s.response)
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+	c.Assert(err, IsNil)
+	c.Assert(client, NotNil)
+	testServer.FlushRequests()
+	testServer.PrepareResponse(200, nil, `"{role": {"id": "role-uuid-1234", "name": "rolename"}}`)
+	err = client.AddRoleToUser("user-uuid4321", "tenant-uuid-567", "role-uuid-1234")
+	c.Assert(err, IsNil)
+	var request *http.Request
+	request = <-testServer.Request
+	expectedUrl := "/tenants/tenant-uuid-567/users/user-uuid4321/roles/OS-KSADM/role-uuid-1234"
+	c.Assert(request.URL.Path, Equals, expectedUrl)
 }
 
 func (s *S) TestRemoveEc2(c *C) {
