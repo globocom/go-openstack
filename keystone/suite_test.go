@@ -10,7 +10,8 @@ import (
 var _ = Suite(&S{})
 
 type S struct {
-	response string
+	response       string
+	brokenResponse string
 }
 
 func Test(t *testing.T) { TestingT(t) }
@@ -22,6 +23,9 @@ func (s *S) SetUpSuite(c *C) {
 	body, err := ioutil.ReadFile("testdata/response.json")
 	c.Assert(err, IsNil)
 	s.response = string(body)
+	brokenBody, err := ioutil.ReadFile("testdata/broken_response.json")
+	c.Assert(err, IsNil)
+	s.brokenResponse = string(brokenBody)
 }
 
 func (s *S) TearDownTest(c *C) {

@@ -115,7 +115,10 @@ func NewClient(username, password, tenantName, authUrl string) (*Client, error) 
 	}
 	token := data["access"]["token"].(map[string]interface{})["id"].(string)
 	client := Client{Token: token, authUrl: authUrl}
-	catalogs := data["access"]["serviceCatalog"].([]interface{})
+	catalogs, ok := data["access"]["serviceCatalog"].([]interface{})
+	if !ok {
+		return nil, errors.New("Error while accessing serviceCatalog key in returned json")
+	}
 	for _, c := range catalogs {
 		catalog := c.(map[string]interface{})
 		serviceCatalog := ServiceCatalog{

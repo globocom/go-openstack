@@ -1,0 +1,30 @@
+{
+    "access": {
+        "token": {
+            "expires": "2012-08-30T16:45:22Z",
+            "id": "secret",
+            "tenant": {
+                "enabled": true,
+                "id": "secret",
+                "name": "tenantname",
+                "description": null
+            }
+        },
+        "user": {
+            "username": "username",
+            "roles_links": [],
+            "id": "7e2e1640fee746a888159a4233f242b3",
+            "roles": [{
+                "id": "e95a9bf1bbf125021be0ddb055a19f9",
+                "name": "admin"
+            }, {
+                "id": "f80cbf9d9a6b54f1b8d2e89e7af6b241",
+                "name": "KeystoneServiceAdmin"
+            }, {
+                "id": "e8aa29b9daa0485488e1110046ef4209",
+                "name": "KeystoneAdmin"
+            }],
+            "name": "username"
+        }
+    }
+}

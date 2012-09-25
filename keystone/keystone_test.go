@@ -25,6 +25,13 @@ func (s *S) TestAuth(c *C) {
 	c.Assert(client.Catalogs[0].Type, Equals, "compute")
 }
 
+func (s *S) TestAuthFailureInServiceCatalog(c *C) {
+	testServer.PrepareResponse(200, nil, s.brokenResponse)
+	_, err := NewClient("username", "pass", "tenantname", testServer.URL)
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, "^Error while accessing serviceCatalog key in returned json$")
+}
+
 func (s *S) TestEndpoint(c *C) {
 	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "tenantname", testServer.URL)
