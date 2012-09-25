@@ -133,7 +133,7 @@ func (s *S) TestRemoveEc2ReturnErrorIfItFailsToRemoveCredentials(c *C) {
 	testServer.PrepareResponse(500, nil, "Failed to remove credential.")
 	err = client.RemoveEc2("stark123", "access-key")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, "^Failed to remove credential.$")
+	c.Assert(err, ErrorMatches, "^.*Failed to remove credential.$")
 }
 
 func (s *S) TestRemoveRoleFromUser(c *C) {
@@ -149,6 +149,17 @@ func (s *S) TestRemoveRoleFromUser(c *C) {
 	expectedUrl := "/tenants/tenant-uuid/users/user-uuid/roles/OS-KSADM/role-uuid"
 	c.Assert(request.URL.Path, Equals, expectedUrl)
 	c.Assert(request.Method, Equals, "DELETE")
+}
+
+func (s *S) TestRemoveRoleFromUserReturning500(c *C) {
+	testServer.PrepareResponse(200, nil, s.response)
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+	c.Assert(err, IsNil)
+	testServer.FlushRequests()
+	testServer.PrepareResponse(500, nil, "")
+	err = client.RemoveRoleFromUser("tenant-uuid", "user-uuid", "role-uuid")
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, "^Error while performing request: 500.*")
 }
 
 func (s *S) TestRemoveUser(c *C) {
@@ -169,7 +180,7 @@ func (s *S) TestRemoveUserReturnErrorIfItFailsToRemoveUser(c *C) {
 	testServer.PrepareResponse(500, nil, "Failed to remove user.")
 	err := client.RemoveUser("start123", "tenant", "member123")
 	c.Assert(err, NotNil)
-	c.Assert(err, ErrorMatches, "^Failed to remove user.$")
+	c.Assert(err, ErrorMatches, "^.*Failed to remove user.$")
 }
 
 func (s *S) TestRemoveUserReturnErrorIfItFailsToRemoveTheRole(c *C) {

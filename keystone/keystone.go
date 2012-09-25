@@ -245,8 +245,7 @@ func (c *Client) AddRoleToUser(tenantId, userId, roleId string) error {
 		return err
 	}
 	if r.StatusCode > 399 {
-		b, _ := ioutil.ReadAll(r.Body)
-		return fmt.Errorf("Error while performing request: %d, %s", r.StatusCode, string(b))
+		return errorFromResponse(r)
 	}
 	return nil
 }
@@ -260,8 +259,8 @@ func (c *Client) RemoveEc2(userId, access string) error {
 
 func (c *Client) RemoveRoleFromUser(tenantId, userId, roleId string) error {
 	url := fmt.Sprintf("%s/tenants/%s/users/%s/roles/OS-KSADM/%s", c.authUrl, tenantId, userId, roleId)
-	c.delete(url)
-	return nil
+	err := c.delete(url)
+	return err
 }
 
 // RemoveUser removes a user. You need also to provide a tenant and a role, so
@@ -290,9 +289,6 @@ func (c *Client) delete(url string) error {
 
 func errorFromResponse(response *http.Response) error {
 	defer response.Body.Close()
-	b, err := ioutil.ReadAll(response.Body)
-	if err != nil {
-		return err
-	}
-	return errors.New(string(b))
+	b, _ := ioutil.ReadAll(response.Body) // discards errors so we don't get fake positives
+	return fmt.Errorf("Error while performing request: %d - %s", response.StatusCode, string(b))
 }
