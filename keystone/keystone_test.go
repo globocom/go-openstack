@@ -78,7 +78,7 @@ func (s *S) TestUserAddRole(c *C) {
 	c.Assert(client, NotNil)
 	testServer.FlushRequests()
 	testServer.PrepareResponse(200, nil, `"{role": {"id": "role-uuid-1234", "name": "rolename"}}`)
-	err = client.AddRoleToUser("user-uuid4321", "tenant-uuid-567", "role-uuid-1234")
+	err = client.AddRoleToUser("tenant-uuid-567", "user-uuid4321", "role-uuid-1234")
 	c.Assert(err, IsNil)
 	var request *http.Request
 	request = <-testServer.Request

@@ -71,7 +71,7 @@ type User struct {
 
 // AddRoleToUser associates a role with a user and tenant
 // Returns an error in case of failure
-func (c *Client) AddRoleToUser(user_id, tenant_id, role_id string) error {
+func (c *Client) AddRoleToUser(tenant_id, user_id, role_id string) error {
 	roleUrl := fmt.Sprintf("/tenants/%s/users/%s/roles/OS-KSADM/%s", tenant_id, user_id, role_id)
 	_, err := c.do("PUT", c.authUrl+roleUrl, nil)
 	return err
@@ -215,7 +215,7 @@ func (c *Client) NewUser(name, password, email, tenantId, roleId string, enabled
 		Name:  data["user"]["name"].(string),
 		Email: data["user"]["email"].(string),
 	}
-	response, err = c.do("PUT", c.authUrl+"/tenants/"+tenantId+"/users/"+user.Id+"/roles/OS-KSADM/"+roleId, nil)
+	err = c.AddRoleToUser(tenantId, user.Id, roleId)
 	if err != nil {
 		panic(err)
 	}
