@@ -53,6 +53,18 @@ func (s *S) TestNewTenant(c *C) {
 	c.Assert(tenant, DeepEquals, &Tenant{Id: "xpto", Name: "name", Description: "desc"})
 }
 
+func (s *S) TestNewTenantReturning500(c *C) {
+	testServer.PrepareResponse(200, nil, s.response)
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+	c.Assert(err, IsNil)
+	c.Assert(client, NotNil)
+	testServer.FlushRequests()
+	testServer.PrepareResponse(500, nil, "")
+	_, err = client.NewTenant("name", "desc", true)
+	c.Assert(err, NotNil)
+	c.Assert(err, ErrorMatches, "^Error while performing request: 500.*")
+}
+
 func (s *S) TestNewUser(c *C) {
 	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")

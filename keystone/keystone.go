@@ -186,6 +186,9 @@ func (c *Client) NewTenant(name, description string, enabled bool) (*Tenant, err
 	response, _ := c.do("POST", c.authUrl+"/tenants", b)
 	defer response.Body.Close()
 	result, _ := ioutil.ReadAll(response.Body)
+	if response.StatusCode > 399 {
+		return nil, fmt.Errorf("Error while performing request: %d, %s", response.StatusCode, string(result))
+	}
 	var data map[string]map[string]interface{}
 	_ = json.Unmarshal(result, &data)
 	tenant := Tenant{
