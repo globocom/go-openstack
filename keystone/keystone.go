@@ -156,6 +156,7 @@ func (c *Client) Endpoint(service, which string) string {
 func (c *Client) do(method, urlStr string, body io.Reader) (*http.Response, error) {
 	request, _ := http.NewRequest(method, urlStr, body)
 	request.Header.Set("X-Auth-Token", c.Token)
+	request.Header.Set("Connection", "close") // this is needed because keystone (webob) returns a '0\r\n\r\n' on the response, even if it's a 204 no content. see https://bitbucket.org/ianb/webob/issue/12
 	if body != nil {
 		request.Header.Set("Content-Type", "application/json")
 	}
@@ -172,6 +173,7 @@ func (c *Client) NewTenant(name, description string, enabled bool) (*Tenant, err
 	defer response.Body.Close()
 	result, _ := ioutil.ReadAll(response.Body)
 	if response.StatusCode > 399 {
+		// TODO (flaviamissi): when keystone url is passed with 5000 port, it returns 200 with no body!
 		return nil, fmt.Errorf("Error while performing request: %d, %s", response.StatusCode, string(result))
 	}
 	var data map[string]map[string]interface{}
@@ -267,7 +269,6 @@ func (c *Client) RemoveRoleFromUser(tenantId, userId, roleId string) error {
 // the role can be removed before the user is deleted.
 func (c *Client) RemoveUser(userId, tenantId, roleId string) error {
 	// FIXME(fsouza): deal with errors. Keystone keep returning malformed response.
-	c.delete(c.authUrl + "/tenants/" + tenantId + "/users/" + userId + "/roles/OS-KSADM/" + roleId)
 	return c.delete(c.authUrl + "/users/" + userId)
 }
 
@@ -289,6 +290,6 @@ func (c *Client) delete(url string) error {
 
 func errorFromResponse(response *http.Response) error {
 	defer response.Body.Close()
-	b, _ := ioutil.ReadAll(response.Body) // discards errors so we don't get fake positives
+	b, _ := ioutil.ReadAll(response.Body) // discards errors so we don't override the original error
 	return fmt.Errorf("Error while performing request: %d - %s", response.StatusCode, string(b))
 }
