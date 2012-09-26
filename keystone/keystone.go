@@ -265,9 +265,9 @@ func (c *Client) RemoveRoleFromUser(tenantId, userId, roleId string) error {
 	return err
 }
 
-// RemoveUser removes a user. You need also to provide a tenant and a role, so
-// the role can be removed before the user is deleted.
-func (c *Client) RemoveUser(userId, tenantId, roleId string) error {
+// RemoveUser removes a user.
+// Keysonte api automatically removes any associations with tenants+roles
+func (c *Client) RemoveUser(userId string) error {
 	// FIXME(fsouza): deal with errors. Keystone keep returning malformed response.
 	return c.delete(c.authUrl + "/users/" + userId)
 }

@@ -168,17 +168,16 @@ func (s *S) TestRemoveUser(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(client, NotNil)
 	testServer.PrepareResponse(200, nil, "")
-	testServer.PrepareResponse(200, nil, "")
-	err = client.RemoveUser("user", "tenant", "member123")
+	err = client.RemoveUser("user")
 	c.Assert(err, IsNil)
 }
 
 func (s *S) TestRemoveUserReturnErrorIfItFailsToRemoveUser(c *C) {
 	testServer.PrepareResponse(200, nil, s.response)
-	client, _ := NewClient("username", "pass", "admin", "http://localhost:4444")
-	testServer.PrepareResponse(200, nil, "")
+	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
+    c.Assert(err, IsNil)
 	testServer.PrepareResponse(500, nil, "Failed to remove user.")
-	err := client.RemoveUser("start123", "tenant", "member123")
+	err = client.RemoveUser("start123")
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, "^.*Failed to remove user.$")
 }
@@ -190,7 +189,7 @@ func (s *S) TestRemoveUserReturnErrorIfItFailsToRemoveTheRole(c *C) {
 	testServer.PrepareResponse(200, nil, s.response)
 	client, _ := NewClient("username", "pass", "admin", "http://localhost:4444")
 	testServer.PrepareResponse(500, nil, "Failed to remove the role.")
-	err := client.RemoveUser("start123", "tenant", "member123")
+	err := client.RemoveUser("start123")
 	c.Assert(err, NotNil)
 	c.Assert(err, ErrorMatches, "^Failed to remove the role.$")
 }
