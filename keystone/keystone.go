@@ -259,6 +259,7 @@ func (c *Client) RemoveEc2(userId, access string) error {
 	return c.delete(c.authUrl + "/users/" + userId + "/credentials/OS-EC2/" + access)
 }
 
+// RemoveRoleFromUser removes the role from the user.
 func (c *Client) RemoveRoleFromUser(tenantId, userId, roleId string) error {
 	url := fmt.Sprintf("%s/tenants/%s/users/%s/roles/OS-KSADM/%s", c.authUrl, tenantId, userId, roleId)
 	err := c.delete(url)
