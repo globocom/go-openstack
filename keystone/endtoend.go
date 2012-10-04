@@ -4,7 +4,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/timeredbull/openstack/keystone"
+	"github.com/globocom/go-openstack/keystone"
 	"os"
 )
 

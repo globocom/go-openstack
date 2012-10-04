@@ -1,8 +1,8 @@
 package nova
 
 import (
-	"github.com/timeredbull/openstack/keystone"
-	ostesting "github.com/timeredbull/openstack/testing"
+	"github.com/globocom/go-openstack/keystone"
+	ostesting "github.com/globocom/go-openstack/testing"
 	. "launchpad.net/gocheck"
 	"testing"
 )

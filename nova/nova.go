@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/timeredbull/openstack/keystone"
+	"github.com/globocom/go-openstack/keystone"
 	"io/ioutil"
 	"net/http"
 	"strings"

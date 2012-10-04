@@ -1,7 +1,7 @@
 Go OpenStack client
 ===================
 
-[![Build Status](https://secure.travis-ci.org/timeredbull/openstack.png?branch=master)](http://travis-ci.org/timeredbull/openstack)
+[![Build Status](https://secure.travis-ci.org/globocom/go-openstack.png?branch=master)](http://travis-ci.org/globocom/go-openstack)
 
 This is a go client for the OpenStack APIs.
 

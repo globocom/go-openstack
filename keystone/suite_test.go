@@ -1,7 +1,7 @@
 package keystone
 
 import (
-	ostesting "github.com/timeredbull/openstack/testing"
+	ostesting "github.com/globocom/go-openstack/testing"
 	"io/ioutil"
 	. "launchpad.net/gocheck"
 	"testing"
