@@ -1,3 +1,7 @@
+// Copyright 2012 go-openstack authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 package keystone
 
 import (
@@ -175,7 +179,7 @@ func (s *S) TestRemoveUser(c *C) {
 func (s *S) TestRemoveUserReturnErrorIfItFailsToRemoveUser(c *C) {
 	testServer.PrepareResponse(200, nil, s.response)
 	client, err := NewClient("username", "pass", "admin", "http://localhost:4444")
-    c.Assert(err, IsNil)
+	c.Assert(err, IsNil)
 	testServer.PrepareResponse(500, nil, "Failed to remove user.")
 	err = client.RemoveUser("start123")
 	c.Assert(err, NotNil)

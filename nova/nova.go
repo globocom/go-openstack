@@ -1,3 +1,7 @@
+// Copyright 2012 go-openstack authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package nova provides types, methods and functions for interactions with the
 // Nova OS API v2.
 package nova

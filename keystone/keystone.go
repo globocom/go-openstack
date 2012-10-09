@@ -1,3 +1,7 @@
+// Copyright 2012 go-openstack authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
+
 // Package keystone provides types, methods and functions for interactions with
 // Keystone API v2.0. It allows a developer to create and delete tenants, users
 // and EC2 credentials (access key and secret key).
