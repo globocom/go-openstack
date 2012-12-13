@@ -1,5 +1,4 @@
-Go OpenStack client
-===================
+#Go OpenStack client
 
 [![Build Status](https://secure.travis-ci.org/globocom/go-openstack.png?branch=master)](http://travis-ci.org/globocom/go-openstack)
 
@@ -18,3 +17,9 @@ novaClient := nova.Client{KeystoneClient: keystoneClient}
 novaClient.DisassociateNetwork(tenant.Id)
 keystoneClient.RemoveTenant(tenant.Id)
 ```
+
+##Disclaimer
+
+The evolution of this project has stopped. If you need an up-to-date and
+frequently developed bind for talking to OpenStack, you should probably meet
+[goose](http://launchpad.net/goose).
