@@ -33,11 +33,11 @@ func (s *S) TestDisassociateNetwork(c *C) {
 	kclient := keystone.Client{
 		Token: "123token",
 		Catalogs: []keystone.ServiceCatalog{
-			keystone.ServiceCatalog{
+			{
 				Name: "Compute Service",
 				Type: "compute",
 				Endpoints: []map[string]string{
-					map[string]string{
+					{
 						"adminURL": "http://localhost:5555/v2/123tenant",
 					},
 				},
@@ -74,11 +74,11 @@ func (s *S) TestDisassociateNetworkForTenantWithoutNetwork(c *C) {
 	kclient := keystone.Client{
 		Token: "123token",
 		Catalogs: []keystone.ServiceCatalog{
-			keystone.ServiceCatalog{
+			{
 				Name: "Compute Service",
 				Type: "compute",
 				Endpoints: []map[string]string{
-					map[string]string{
+					{
 						"adminURL": "http://localhost:5555/v2/123tenant",
 					},
 				},
