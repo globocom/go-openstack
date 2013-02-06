@@ -2,7 +2,13 @@ language: go
 before_install:
   - sudo apt-get update -qq
   - sudo apt-get install bzr -qq
+  - mkdir -p $GOPATH/src/github.com/globocom/go-openstack
+  - mv * $GOPATH/src/github.com/globocom/go-openstack
 install:
+  - pushd $GOPATH/src/github.com/globocom/go-openstack
   - go get launchpad.net/gocheck
+  - popd
 script:
+  - pushd $GOPATH/src/github.com/globocom/go-openstack
   - go test ./...
+  - popd
